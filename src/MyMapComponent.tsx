@@ -1,5 +1,5 @@
 import * as React from "react";
-import {  GoogleMap, Polyline, withGoogleMap, withScriptjs, Marker } from 'react-google-maps';
+import {  GoogleMap, Polyline, withGoogleMap, withScriptjs, Marker, InfoWindow } from 'react-google-maps';
 
 class MyMapComponent extends React.Component {
     state = {
@@ -7,7 +7,7 @@ class MyMapComponent extends React.Component {
         step: -1
     };
 
-    defaultCenter = { date: 'none', lat: 43.6, lng: -79.64 }
+    defaultCenter = { date: 'none', lat: 43.6, lng: -79.64, info1: 'This is Harvey.', info2: 'Let\'s start from here...'}
         
     proxyUrl = 'https://cors-anywhere.herokuapp.com/'
     //private apiUrl = "http://www.followmee.com/api/tracks.aspx?key=98809aec147567aec9e9864651813f24&username=peakpower&output=json&function=historyfordevice&history=1&deviceid=12095698"
@@ -18,7 +18,11 @@ class MyMapComponent extends React.Component {
         let currentLoc = this.state.step == -1? this.defaultCenter:this.state.pathData[this.state.step]
         return (<GoogleMap defaultZoom={11} defaultCenter={this.defaultCenter} center={this.state.step == -1? this.defaultCenter : this.state.pathData[this.state.step]}>
             <Polyline path={this.state.pathData} />
-            <Marker key={currentLoc.date}  position={{ lat : currentLoc.lat, lng : currentLoc.lng}} />
+            <Marker key={currentLoc.date}  position={{ lat : currentLoc.lat, lng : currentLoc.lng}} >
+            <InfoWindow >
+                <div>{currentLoc.info1}<br/>{currentLoc.info2}</div>
+              </InfoWindow>
+            </Marker>
         </GoogleMap>);
     };
 
@@ -29,16 +33,16 @@ class MyMapComponent extends React.Component {
             fetch(this.proxyUrl + this.apiUrl)
                 .then(data => data.json())
                 .then(data => {
-                    console.table(data);
+                    // console.table(data);
                     // !!! Error: "DeviceID not valid for your user name. Or your device is in free license and API does not work with free license"__proto__: Object
                     // use demo data to do testing
                     data = data.Data;
-                    console.table(data);
+                    // console.table(data);
                     return data;
                 })
-                .then(data => data.map((d: any) => { return { date: d.Date, lat: d.Latitude, lng: d.Longitude } }))
+                .then(data => data.map((d: any) => { return { date: d.Date, lat: d.Latitude, lng: d.Longitude, info1: d.Date, info2: "Speed(km/h): " +d['Speed(km/h)']} }))
                 .then(data => { 
-                    console.table(data); 
+                    // console.table(data); 
                     this.setState({ pathData: data, step: 0 }); 
                 })
                 .catch(e => {
